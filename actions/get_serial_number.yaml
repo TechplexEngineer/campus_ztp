@@ -1,9 +1,9 @@
 ---
-name: "get_version"
+name: "get_serial_number"
 runner_type: "run-python"
-description: "gets the version information as a json record"
+description: "gets the device serial number information as a json record"
 enabled: true
-entry_point: "get_version.py"
+entry_point: "get_serial_number.py"
 parameters:
   device:
     type: "string"
@@ -27,7 +27,7 @@ parameters:
     required: false
   via:
     type: "string"
-    description: "what way? SSH or Telnet? Telnet is default."
+    description: "what way?"
     enum:
       - "telnet"
       - "ssh"

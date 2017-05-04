@@ -16,23 +16,16 @@ logging_watch_sensor:
 # List of Boot images per vender, per device type
 boot_images:
   Brocade:
-    ICX6450: "kxz10105.bin"
     ICX7250: "spz10106.bin"
     ICX7450: "spz10106.bin"
     ICX7750: "swz10106.bin"
-    FCX624: "swz10106.bin"
-    FCX648: "swz10106.bin"
-
 
 # List of Software images per vender, per function, per device type
 software_images:
   Brocade:
-    ICX6450: "ICX64S08030mb.bin"
     ICX7250: "sps08040a.bin"
     ICX7450: "sps08040a.bin"
     ICX7750: "sws08040a.bin"
-    FCX624: "fcxs08030k.bin"
-    FCX648: "fcxs08030k.bin"
 
 # Syslog Sensor
 #

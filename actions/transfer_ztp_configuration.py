@@ -51,7 +51,7 @@ class TransferZTPConfigurationAction(actions.SessionAction):
                         return (False, "Failed")
 
                     scp = Secure_Copy.Secure_Copy(device, self._username, self._password)
-
+                    print "secure copy file %s to device %s" % (self._filename, device)
                     # TODO: This should be done when generate_keys is done
                     scp.erase_existing_ssh_key_for_host()
 
@@ -59,6 +59,8 @@ class TransferZTPConfigurationAction(actions.SessionAction):
                         session.reload(writemem=False)
                         os.remove(self._filename)
                         return (True, "Success")
+                    else: # DETERRAK
+                        sys,stderr,write("Error secure copying the file to deivce %s" % excel_key)
 
                     os.remove(self._filename)
                     

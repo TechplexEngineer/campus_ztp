@@ -35,6 +35,7 @@ class GetFlashAction(actions.SessionAction):
             result = {}
 
             unit_and_version = re.compile('(^\s+UNIT )(\d+)(:.+)(labeled as )(.+)')
+            serial_number = re.compile('^\s+Serial\W+(\w+)')
             boot = re.compile('(^\s+.+Boot-Monitor.+ Version:)([\d\w\.]+)')
             hardware = re.compile('(^\s+HW: )(Stackable )?([\w\d\-]+)')
 
@@ -46,6 +47,11 @@ class GetFlashAction(actions.SessionAction):
                     unit = match.group(2)
                     version = match.group(5)
                     result['firmware'].append({'unit': int(unit), 'version': version.upper()})
+                match = serial_number.match(line)
+                if match:
+                    print("matched serial number")
+                    sn = match.group(1)
+                    result.update({'serial': sn})
                 match = hardware.match(line)
                 if match:
                     print("matched hardware")

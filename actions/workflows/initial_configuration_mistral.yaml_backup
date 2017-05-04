@@ -14,7 +14,7 @@ campus_ztp.initial_configuration_mistral:
       # [250, 20]
       action: campus_ztp.delay
       input:
-        seconds: 10
+        seconds: 90
       on-success:
         - get_version
     get_version:
@@ -24,7 +24,6 @@ campus_ztp.initial_configuration_mistral:
         device: '<% $.client_ip %>'
       on-success:
         - is_boot_code_current
-        - pub_serial_number
     is_boot_code_current:
       # [254, 200]
       action: campus_ztp.is_boot_code_current
@@ -71,14 +70,6 @@ campus_ztp.initial_configuration_mistral:
       action: campus_ztp.transfer_ztp_configuration
       input:
         device: '<% $.client_ip %>'
-        excel_key: <% task(pub_serial_number).result.result.serial %>
-    pub_serial_number:
-      # [550, 100]
-      action: campus_ztp.convert_json_to_dict
-      input:
-        jsonString: '<% task(get_version).result.result %>'
-      
-
-      
+        excel_key: '<% $.remote_id %>_<% $.circuit_id %>'
         
 

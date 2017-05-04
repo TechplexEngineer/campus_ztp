@@ -104,6 +104,8 @@ device(config)# ip dhcp-snooping vlan 10 insert-relay-information
 ```
 ICX:
 ```
+Note: You must be running the routing code. Usually stored in the secondary flash partition.
+
 !!! Prerequist for DHCP Snooping:
 device(config)#enable ACL-per-port-per-vlan
 device(config)#write memory
@@ -122,8 +124,9 @@ device(config-if-e10000-1/1/1)#exit
 device(config)#interface ethernet 1/1/3
 device(config-if-e1000-1/1/3)#dhcp snooping relay information subscriber-id stackmaster
 ```
+Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by the subscriber-id and port number.
 
-Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory and modify the API key in the file with the key you generate with:
+Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the API key in the file with the key you generate with:
 
 ```
 st2 apikey create -k -m '{"used_by":"DHCP server"}'
@@ -152,7 +155,8 @@ Save and Restart:
 sudo service apparmor restart
 ```
 
-Create 'brocade.cfg' to your TFTP directory with the following contents. It will be loaded by the switch and provide for the initial configuration to allow for the SCP copy of the final configuration. 
+#Create a file named 'brocade.cfg' in your TFTP directory with the following contents. 
+#It will be loaded by the switch and provide for the initial configuration to allow for the SCP copy of the final configuration. 
 
 ```
 user admin password brocade
@@ -163,7 +167,7 @@ Add all the neccessary boot and image files to your TFTP server directory
 
 ## Configuration 
 
-Edit the config.yaml for your environment
+Edit the config.yaml for your environment. By default the config.yaml file assumes that you will run the TFTP server and DHCP server on the same machine. The defualt IP address is 10.0.0.38.
 
 * `templates` - directory where templates are stored
 * `excel` - location of excel spreadsheet of configuration data

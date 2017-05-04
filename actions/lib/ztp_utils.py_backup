@@ -71,13 +71,6 @@ def create_configuration(device, excel_file, template_dir, additional_variables)
 
 def get_variables_for_key(excel_key, excel_file, variables):
     excel = Excel_Reader.Excel_Reader(excel_file)
-    if len(excel_key) > 40 : #fix me, need to detect json better
-        # the payload contains JSON DETERRAK
-        tmp = json.loads(excel_key)
-        excel_key = tmp['serial']
-        sys.stdout.write("excel_key was a json formatted file. Using serial = %s" % excel_key)
-    else :
-        sys.stout.write("excel_key was not json formetted trying %s" % excel_key)
     vfk = excel.get_variables_for_key(excel_key)
     if variables == '[]':  # default
         return vfk
@@ -94,9 +87,9 @@ def get_variables_for_key(excel_key, excel_file, variables):
 def compare_versions(existing_version, new_version):
     ''' Input: ##.##.##aa  Output: True if the existing code is less the new.'''
 
-    sys.stderr.write("++++++++++++++++++++++++++++++++++++++++++++++++")
-    sys.stderr.write("existing_version %s" % existing_version)
-    sys.stderr.write(" new_version %s" % new_version)
+    syslog.syslog("++++++++++++++++++++++++++++++++++++++++++++++++")
+    syslog.syslog("existing_version %s" % existing_version)
+    syslog.syslog(" new_version %s" % new_version)
 
     regex = re.compile('([0-9]+)\.([0-9]+)\.([0-9]+)([a-zA-Z]*)')
 

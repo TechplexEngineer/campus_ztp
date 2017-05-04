@@ -11,14 +11,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 from st2actions.runners.pythonrunner import Action
-from lib import ztp_utils
 
 
-class GetExcelVariablesAction(Action):
+class convertJsonToDict(Action):
     def __init__(self, config):
-        super(GetExcelVariablesAction, self).__init__(config)
-        self._excel_file = self.config['excel_file']
-    
-    def run(self, excel_key, variables=''):
-        return ztp_utils.get_variables_for_key(excel_key, self._excel_file, variables)
+        super(convertJsonToDict, self).__init__(config)
+
+    def run(self, jsonString):
+        result = json.loads(jsonString)
+        print "received %s \r\n" % jsonString
+        print "result is => %s" % result
+        return result

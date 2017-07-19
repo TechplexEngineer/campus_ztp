@@ -129,9 +129,10 @@ device(config-if-e10000-1/1/1)#exit
 device(config)#interface ethernet 1/1/3
 device(config-if-e1000-1/1/3)#dhcp snooping relay information subscriber-id stackmaster
 ```
+## Modified get_version.py
 Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by t
 he subscriber-id and port number.
-
+## DHCP server scripts
 Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the A
 PI key in the file with the key you generate with:
 
@@ -147,23 +148,24 @@ valid_ouis = ['cc:4e:24','60:9c:9f']
 max_timespan = 10  # In Seconds
 tmp_dir = '/tmp'
 ```
-
+### Modify apparmor
 In order to let the DHCP server run the WebHook, you'll need to modify apparmor:
 
 ```
 sudo vi /etc/apparmor.d/usr.sbin.dhcpd
+````
 
-Add at the end of the file:
-
-# Campus ZTP
+### Add the following to the the end of the file:
+````
 /etc/dhcp/st2_dhcp_webhook cux,
+````
 
-Save and Restart:
-
+### Save and Restart:
+````
 sudo service apparmor restart
-```
+````
 
-# Install a tftp server.
+## Install a tftp server.
 For Ubuntu
 ````
 sudo apt-get install tftpd-hpa

@@ -1,10 +1,13 @@
 # Campus ZTP Integration Pack
 
-This integration pack works with Brocade Workflow Composer (BWC) to enhance Zero Touch Provisioning (ZTP) to reliably setup ICX campus access Ethernet switches.
+This integration pack works with Brocade Workflow Composer (BWC) to enhance Zero Touch Provisioning (ZTP) to reliably setup ICX campus access
+ Ethernet switches.
 
-BWC is a platform for integration and automation across services and tools. It ties together your existing infrastructure and application environment so you can more easily automate that environment. It has a particular focus on taking actions in response to events.
+BWC is a platform for integration and automation across services and tools. It ties together your existing infrastructure and application env
+ironment so you can more easily automate that environment. It has a particular focus on taking actions in response to events.
 
-This implementation of ZTP utilizes an Excel spreadsheet as the source for variables to replace in a JINJA template. That combined information builds the final device-specific configuration that is pushed securely to the device via Secure Copy.
+This implementation of ZTP utilizes an Excel spreadsheet as the source for variables to replace in a JINJA template. That combined informatio
+n builds the final device-specific configuration that is pushed securely to the device via Secure Copy.
 
 There are additional actions to perform time-saving tasks on the network as well as perform automated backups.
 
@@ -17,7 +20,8 @@ https://youtu.be/ar6Kazlapu0
 Follow these steps to get started with this integration pack.
 
 1. You will need to have BWC already installed. Follow these steps here: https://bwc-docs.brocade.com/install/bwc.html
-2. BWC architecture can be an all in one on a single box or with separate nodes for work and sensor nodes. Either way these nodes will need network connectivity to the management network with the switches being provisioned.
+2. BWC architecture can be an all in one on a single box or with separate nodes for work and sensor nodes. Either way these nodes will need n
+etwork connectivity to the management network with the switches being provisioned.
 3. ZTP relies on a TFTP and DHCP server which will also need to have network connectivity to the switches.
 
 ## Installation of Campus ZTP Pack
@@ -30,14 +34,15 @@ Follow these steps to get started with this integration pack.
 
 If using Ubuntu 16.04, in order to use SSH/SCP, you must add the following to /root/.ssh/config:
 
-``` 
+```
 Host *
   KexAlgorithms +diffie-hellman-group1-sha1
 ```
 
 ## Additional Setups
 
-To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to your isc-dhcp-server dhcpd.conf file (in addition to creating a pool for the provisioning network):
+To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to your isc-dhcp-server dhcpd.conf file (
+in addition to creating a pool for the provisioning network):
 
 ```
 #
@@ -48,50 +53,50 @@ option agent.subscriber-id code 6 = text;
 option hostname code 12 = text;
 
 on commit {
-	set ClientIP = binary-to-ascii(10,8,".",leased-address);
-	set ClientMac = concat (
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,1,1))),2), ":",
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,2,1))),2), ":",
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,3,1))),2), ":",
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,4,1))),2), ":",
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,5,1))),2), ":",
-		suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,6,1))),2)
-	);
+        set ClientIP = binary-to-ascii(10,8,".",leased-address);
+        set ClientMac = concat (
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,1,1))),2), ":",
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,2,1))),2), ":",
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,3,1))),2), ":",
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,4,1))),2), ":",
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,5,1))),2), ":",
+                suffix (concat ("0", binary-to-ascii (16, 8, "", substring(hardware,6,1))),2)
+        );
 
-	set Name = option hostname;
-	set RemoteId = "";
-	set CircuitId = "";
-	set SubscriberId = "";
-	if exists agent.circuit-id
-	{
-		set RemoteId = concat (
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,0,1))),2), ":",
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,1,1))),2), ":",
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,2,1))),2), ":",
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,3,1))),2), ":",
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,4,1))),2), ":",
-			suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,5,1))),2)
-		);
-		
-		#For NetIron:
-		set CircuitId = binary-to-ascii(10,8,"/",substring(option agent.circuit-id,2,4));
-		#For ICX:
-		#set CircuitId = binary-to-ascii(10,8,"/",substring(option agent.circuit-id,4,4));
-	}
-	if exists agent.subscriber-id
-	{
-		set SubscriberId = option agent.subscriber-id;
-	}
-	set Json = concat("{",
-				"\"client_ip\":\"",ClientIP,"\",",
-				"\"client_mac\":\"",ClientMac,"\",",
-				"\"hostname\":\"",Name,"\",",
-				"\"remote_id\":\"",RemoteId,"\",",
-				"\"circuit_id\":\"",CircuitId,"\",",
-				"\"subscriber_id\":\"",SubscriberId,"\"",
-			  "}");
-	log(Json);
-	execute ("/etc/dhcp/st2_dhcp_webhook",Json);
+        set Name = option hostname;
+        set RemoteId = "";
+        set CircuitId = "";
+        set SubscriberId = "";
+        if exists agent.circuit-id
+        {
+                set RemoteId = concat (
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,0,1))),2), ":",
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,1,1))),2), ":",
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,2,1))),2), ":",
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,3,1))),2), ":",
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,4,1))),2), ":",
+                        suffix (concat ("0", binary-to-ascii (16, 8, "", substring(option agent.remote-id,5,1))),2)
+                );
+
+                #For NetIron:
+                set CircuitId = binary-to-ascii(10,8,"/",substring(option agent.circuit-id,2,4));
+                #For ICX:
+                #set CircuitId = binary-to-ascii(10,8,"/",substring(option agent.circuit-id,4,4));
+        }
+        if exists agent.subscriber-id
+        {
+                set SubscriberId = option agent.subscriber-id;
+        }
+        set Json = concat("{",
+                                "\"client_ip\":\"",ClientIP,"\",",
+                                "\"client_mac\":\"",ClientMac,"\",",
+                                "\"hostname\":\"",Name,"\",",
+                                "\"remote_id\":\"",RemoteId,"\",",
+                                "\"circuit_id\":\"",CircuitId,"\",",
+                                "\"subscriber_id\":\"",SubscriberId,"\"",
+                          "}");
+        log(Json);
+        execute ("/etc/dhcp/st2_dhcp_webhook",Json);
 
 }
 ```
@@ -124,15 +129,18 @@ device(config-if-e10000-1/1/1)#exit
 device(config)#interface ethernet 1/1/3
 device(config-if-e1000-1/1/3)#dhcp snooping relay information subscriber-id stackmaster
 ```
-Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by the subscriber-id and port number.
+Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by t
+he subscriber-id and port number.
 
-Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the API key in the file with the key you generate with:
+Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the A
+PI key in the file with the key you generate with:
 
 ```
 st2 apikey create -k -m '{"used_by":"DHCP server"}'
 ```
 
-Edit the dhcp_commit_valid.py file to include the vender OUI'S (or macs) you want to perform ZTP on and the max_timespan to retain previous request for the same MAC (This suppresses duplicate DHCP requests from the same switch).
+Edit the dhcp_commit_valid.py file to include the vender OUI'S (or macs) you want to perform ZTP on and the max_timespan to retain previous r
+equest for the same MAC (This suppresses duplicate DHCP requests from the same switch).
 
 ```
 valid_ouis = ['cc:4e:24','60:9c:9f']
@@ -155,19 +163,36 @@ Save and Restart:
 sudo service apparmor restart
 ```
 
-#Create a file named 'brocade.cfg' in your TFTP directory with the following contents. 
-#It will be loaded by the switch and provide for the initial configuration to allow for the SCP copy of the final configuration. 
+# Install a tftp server.
+For Ubuntu
+````
+sudo apt-get install tftpd-hpa
+````
+# Change the tftpd-hpa's default values
+````
+sudo vim /etc/default/tftpd-hpa
+TFTP_OPTIONS="--secure --create"
+````
+# Add a firewall rule to allow for tftp (if you have a firewall enabled)
+````
+sudo ufw allow tftp
+````
 
+# Create a file named 'brocade.cfg'
+Place it in your TFTP directory ( the default location is /var/lib/tftpboot/ ) with the following contents.
 ```
 user admin password brocade
 aaa authentication login default local
 ```
 
+It will be loaded by the switch and provide for the initial configuration to allow for the SCP copy of the final configuration.
+
 Add all the neccessary boot and image files to your TFTP server directory
 
-## Configuration 
+## Configuration
 
-Edit the config.yaml for your environment. By default the config.yaml file assumes that you will run the TFTP server and DHCP server on the same machine. The defualt IP address is 10.0.0.38.
+Edit the config.yaml for your environment. By default the config.yaml file assumes that you will run the TFTP server and DHCP server on the s
+ame machine. The defualt IP address is 10.0.0.38.
 
 * `templates` - directory where templates are stored
 * `excel` - location of excel spreadsheet of configuration data
@@ -185,6 +210,39 @@ st2 key set campus_ztp.username 'stackstorm'
 st2 key set campus_ztp.password 'stackstorm' --encrypt
 st2 key set campus_ztp.enable_username 'stackstorm'
 st2 key set campus_ztp.enable_password 'stackstorm' --encrypt
+```
+
+## Additional Notes:
+
+* In the Excel spreadsheet, the sheet used for switch configuration must be named "SWITCHES"
+
+## Actions
+
+```
++-------------------------------------------------+-------------------------------------------------+
+| ref                                             | description                                     |
++-------------------------------------------------+-------------------------------------------------+
+| campus_ztp.backup_configuration                 | backups the configuration via SCP               |
+| campus_ztp.delay                                | creates a delay                                 |
+| campus_ztp.generate_ssh_key                     | generates the nessessary keys to ssh into the   |
+|                                                 | box                                             |
+| campus_ztp.get_configuration                    | builds the switch configuration                 |
+| campus_ztp.get_flash                            | gets the current flash information as a json    |
+|                                                 | record                                          |
+| campus_ztp.get_modules                          | gets the modules by unit as a json record       |
+| campus_ztp.get_version                          | gets the version information as a json record   |
+| campus_ztp.initial_configuration_chain          | Campus ZTP Workflow                             |
+| campus_ztp.is_boot_code_current                 | checks to see if boot code is current           |
+| campus_ztp.is_image_current                     | checks to see if image is current               |
+| campus_ztp.secure_copy                          | secure copies with interactive login            |
+| campus_ztp.send_cli_command                     | send cli command(s) to the device(s)            |
+| campus_ztp.send_cli_template                    | send cli template to the device(s)              |
+| campus_ztp.set_hostname                         | sets the hostname on a box                      |
+| campus_ztp.transfer_ztp_configuration           | builds startup configuration, telnets to        |
+|                                                 | device, transfers config via SCP from server,   |
+|                                                 | and reloads switch                              |
+| campus_ztp.update_spreadsheet                   | adds/updates variables to a spreadsheet         |
+root@u16:/opt/stackstorm/packs/campus_ztp# vim README.md
 ```
 
 ## Additional Notes:

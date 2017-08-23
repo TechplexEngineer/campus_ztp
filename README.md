@@ -37,7 +37,25 @@ Host *
 
 ## Additional Setups
 
-To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to your isc-dhcp-server dhcpd.conf file (in addition to creating a pool for the provisioning network):
+### DHCP
+To start the BWC workflow, we add a hook into the DHCP server which compiles some information about the DHCP client and then creates a web request against a configured endpoint in BWC.
+
+#### Install DHCP Server
+`sudo apt-get install isc-dhcp-server`
+
+#### Configure DHCP server to hand out addresses
+Config file lives here `/etc/dhcp/dhcpd.conf`
+
+```
+subnet 10.10.0.0 netmask 255.255.255.255.0 {
+  range 10.10.0.50 10.10.0.60;
+  option broadcast-address 10.10.0.255;
+  option routers 10.10.0.49;
+}
+```
+
+#### Option 82 Trigger
+To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to the end of your isc-dhcp-server dhcpd.conf file:
 
 ```
 #
@@ -95,7 +113,7 @@ on commit {
 
 }
 ```
-
+#### Option 82 Snooping on core switch
 Turn on Option-82 (DHCP Snooping) on the MLXe or ICX distribution/core devices:
 
 MLX:
@@ -122,13 +140,13 @@ device(config-if-e10000-1/1/1)#exit
 device(config)#interface ethernet 1/1/3
 device(config-if-e1000-1/1/3)#dhcp snooping relay information subscriber-id stackmaster
 ```
-
+#### Setup Webhook
 Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory and modify the API key in the file with the key you generate with:
 
 ```
 st2 apikey create -k -m '{"used_by":"DHCP server"}'
 ```
-
+#### MAC Filtering
 Edit the dhcp_commit_valid.py file to include the vender OUI'S (or macs) you want to perform ZTP on and the max_timespan to retain previous request for the same MAC (This suppresses duplicate DHCP requests from the same switch).
 
 ```
@@ -136,21 +154,23 @@ valid_ouis = ['cc:4e:24','60:9c:9f']
 max_timespan = 10  # In Seconds
 tmp_dir = '/tmp'
 ```
-
+#### Apparmor enable webhook
 In order to let the DHCP server run the WebHook, you'll need to modify apparmor:
 
-```
-sudo vi /etc/apparmor.d/usr.sbin.dhcpd
+
+`sudo vi /etc/apparmor.d/usr.sbin.dhcpd`
 
 Add at the end of the file:
-
+```
 # Campus ZTP
 /etc/dhcp/st2_dhcp_webhook cux,
-
+```
 Save and Restart:
 
-sudo service apparmor restart
-```
+`sudo service apparmor restart`
+
+### Setup a TFTP server
+@todo
 
 Create 'brocade.cfg' to your TFTP directory with the following contents. It will be loaded by the switch and provide for the initial configuration to allow for the SCP copy of the final configuration. 
 

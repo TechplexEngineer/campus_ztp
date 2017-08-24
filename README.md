@@ -41,8 +41,25 @@ Host *
 
 ## Additional Setups
 
-To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to your isc-dhcp-server dhcpd.conf file (
-in addition to creating a pool for the provisioning network):
+### DHCP
+To start the BWC workflow, we add a hook into the DHCP server which compiles some information about the DHCP client and then creates a web request against a configured endpoint in BWC.
+
+#### Install DHCP Server
+`sudo apt-get install isc-dhcp-server`
+
+#### Configure DHCP server to hand out addresses
+Config file lives here `/etc/dhcp/dhcpd.conf`
+
+```
+subnet 10.10.0.0 netmask 255.255.255.255.0 {
+  range 10.10.0.50 10.10.0.60;
+  option broadcast-address 10.10.0.255;
+  option routers 10.10.0.49;
+}
+```
+
+#### Option 82 Trigger
+To trigger off of DHCP and option-82 information for true ZTP provisioning, add the following lines to the end of your isc-dhcp-server dhcpd.conf file:
 
 ```
 #
@@ -100,7 +117,7 @@ on commit {
 
 }
 ```
-
+#### Option 82 Snooping on core switch
 Turn on Option-82 (DHCP Snooping) on the MLXe or ICX distribution/core devices:
 
 MLX:
@@ -129,58 +146,49 @@ device(config-if-e10000-1/1/1)#exit
 device(config)#interface ethernet 1/1/3
 device(config-if-e1000-1/1/3)#dhcp snooping relay information subscriber-id stackmaster
 ```
-## Modified get_version.py
-Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by t
-he subscriber-id and port number.
-## DHCP server scripts
-Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the A
-PI key in the file with the key you generate with:
+
+
+#### DHCP server scripts
+
+##### Modified get_version.py
+Note: Modifications were made to 'get_version' to include an option for looking up by the device serial number in addition to looking up by the subscriber-id and port number.
+
+Then copy over st2_dhcp_webhook and dhcp_commit_valid.py to the /etc/dhcp directory make sure that both files are executable and modify the API key in the file with the key you generate with:
 
 ```
 st2 apikey create -k -m '{"used_by":"DHCP server"}'
 ```
-
-Edit the dhcp_commit_valid.py file to include the vender OUI'S (or macs) you want to perform ZTP on and the max_timespan to retain previous r
-equest for the same MAC (This suppresses duplicate DHCP requests from the same switch).
+#### MAC Filtering
+Edit the dhcp_commit_valid.py file to include the vender OUI'S (or macs) you want to perform ZTP on and the max_timespan to retain previous request for the same MAC (This suppresses duplicate DHCP requests from the same switch).
 
 ```
 valid_ouis = ['cc:4e:24','60:9c:9f']
 max_timespan = 10  # In Seconds
 tmp_dir = '/tmp'
 ```
-### Modify apparmor
+#### Modify apparmor
 In order to let the DHCP server run the WebHook, you'll need to modify apparmor:
 
-```
-sudo vi /etc/apparmor.d/usr.sbin.dhcpd
-````
+`sudo vi /etc/apparmor.d/usr.sbin.dhcpd`
 
-### Add the following to the the end of the file:
-````
-/etc/dhcp/st2_dhcp_webhook cux,
-````
+__Add the following to the the end of the file:__
+`/etc/dhcp/st2_dhcp_webhook cux,`
 
-### Save and Restart:
-````
-sudo service apparmor restart
-````
+##### Save and Restart:
+`sudo service apparmor restart`
 
-## Install a tftp server.
+### Install a tftp server.
 For Ubuntu
-````
-sudo apt-get install tftpd-hpa
-````
-# Change the tftpd-hpa's default values
-````
-sudo vim /etc/default/tftpd-hpa
-TFTP_OPTIONS="--secure --create"
-````
-# Add a firewall rule to allow for tftp (if you have a firewall enabled)
-````
-sudo ufw allow tftp
-````
+`sudo apt-get install tftpd-hpa`
 
-# Create a file named 'brocade.cfg'
+#### Change the tftpd-hpa's default values
+`sudo vim /etc/default/tftpd-hpa`
+`TFTP_OPTIONS="--secure --create"`
+
+#### Add a firewall rule to allow for tftp (if you have a firewall enabled)
+`sudo ufw allow tftp`
+
+#### Create a file named 'brocade.cfg'
 Place it in your TFTP directory ( the default location is /var/lib/tftpboot/ ) with the following contents.
 ```
 user admin password brocade
@@ -193,8 +201,7 @@ Add all the neccessary boot and image files to your TFTP server directory
 
 ## Configuration
 
-Edit the config.yaml for your environment. By default the config.yaml file assumes that you will run the TFTP server and DHCP server on the s
-ame machine. The defualt IP address is 10.0.0.38.
+Edit the config.yaml for your environment. By default the config.yaml file assumes that you will run the TFTP server and DHCP server on the same machine. The defualt IP address is 10.0.0.38.
 
 * `templates` - directory where templates are stored
 * `excel` - location of excel spreadsheet of configuration data

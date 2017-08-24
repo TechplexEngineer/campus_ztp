@@ -171,7 +171,7 @@ In order to let the DHCP server run the WebHook, you'll need to modify apparmor:
 
 `sudo vi /etc/apparmor.d/usr.sbin.dhcpd`
 
-__Add the following to the the end of the file:__
+__Add the following to the the end of the file just before the last closing `}`__    
 `/etc/dhcp/st2_dhcp_webhook cux,`
 
 ##### Save and Restart:

@@ -26,9 +26,9 @@ etwork connectivity to the management network with the switches being provisione
 
 ## Installation of Campus ZTP Pack
 
-1. Fork or download the pack into the /opt/stackstorm/packs/ directory
-2. Run: st2 run packs.setup_virtualenv packs=campus_ztp
-3. Run: st2ctl reload
+1. Fork or download the pack into the `/opt/stackstorm/packs/` directory
+2. Run: `st2 run packs.setup_virtualenv packs=campus_ztp`
+3. Run: `st2ctl reload`
 
 ## Communicating with devices
 
